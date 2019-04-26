@@ -99,10 +99,11 @@ while (1):
         mode = rbnmatch.group(4).strip()
         db = int(rbnmatch.group(5))
         speed = int(rbnmatch.group(6))
-        spot_time = rbnmatch.group(8)
+        spot_time_string = rbnmatch.group(8)
+        spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
         #band = qrg_to_band(qrg)
         print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed{}: time:{}".format(de_call, qrg, dx_call, mode, db, speed, spot_time))
-        sql = "INSERT INTO cluster(de_call, qrg, dx_call, speed, db, source) VALUES ('{}', {}, '{}', '{}', '{}', {})".format(de_call, qrg, dx_call, db, speed, cluster_id)
+        sql = "INSERT INTO cluster(de_call, qrg, dx_call, speed, db, clx_timestamp, source) VALUES ('{}', {}, '{}', '{}', '{}', '{}', {})".format(de_call, qrg, dx_call, speed, db, spot_time, cluster_id)
         print(sql)
         try:
             # Execute the SQL command
