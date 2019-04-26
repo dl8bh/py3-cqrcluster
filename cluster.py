@@ -1,13 +1,61 @@
+import os
 import telnetlib
 import re
 import time
+import configparser
+from datetime import datetime
+import pymysql
+import pprint
+
+
+CFG = configparser.ConfigParser()
+CFG.read(os.path.expanduser(os.path.dirname(__file__) + '/cluster.cfg'))
+MYSQL_HOST  = CFG.get('CLUSTER', 'mysql_host')
+MYSQL_PORT  = CFG.get('CLUSTER', 'mysql_port')
+MYSQL_USER  = CFG.get('CLUSTER', 'mysql_user')
+MYSQL_PASS  = CFG.get('CLUSTER', 'mysql_pass')
+MYSQL_DB    = CFG.get('CLUSTER', 'mysql_db')
+
+mysql_conn = pymysql.connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
+mysql_cursor = mysql_conn.cursor()
+
+def get_clusters():
+    try:
+   # Execute the SQL command
+        mysql_cursor.execute("SELECT * FROM dxclusters")
+        # Fetch all the rows in a list of lists.
+        results = mysql_cursor.fetchall()
+        pp = pprint.PrettyPrinter()
+        pp.pprint(results)
+        clusters = dict()
+        for row in results:
+            cluster = {
+                "ID"    : row[0],
+                "NAME"  : row[1],
+                "HOST"  : row[2],
+                "PORT"  : row[3],
+                "CALL"  : row[4],
+                "PASS"  : row[5]
+            }
+            clusters[row[0]] = cluster
+        pp.pprint(clusters)
+        return(clusters)
+    except:
+        print ("Error: unable to fetch data")
+
+    
+
+clusters = get_clusters()
+
+def close_database_connection():
+    mysql_conn.close()
 
 # source: https://www.la1k.no/2017/11/01/parsing-a-dx-cluster-using-python-and-club-log/
 # Open connection to telnet
-owncall = 'dl8bh'
+owncall = clusters[6]["CALL"]
 mode = "rbn"
-remote_host = "216.93.248.68"
-remote_port = 7000
+remote_host = clusters[6]["HOST"]
+remote_port = clusters[6]["PORT"]
 loginstring=''
 if mode == "rbn":
     expect_string = ('Please enter your call: ')
