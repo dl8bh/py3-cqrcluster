@@ -52,23 +52,19 @@ def close_database_connection():
 
 # source: https://www.la1k.no/2017/11/01/parsing-a-dx-cluster-using-python-and-club-log/
 # Open connection to telnet
-owncall = clusters[6]["CALL"]
+owncall = clusters[4]["CALL"] + "\n"
+password = clusters[4]["PASS"] + "\n"
 mode = "rbn"
-remote_host = clusters[6]["HOST"]
-remote_port = clusters[6]["PORT"]
-loginstring=''
-if mode == "rbn":
-    expect_string = ('Please enter your call: ')
-    login_string = '{}\n'.format(owncall)
-elif mode == "cc":
-    expect_string = ('login: ')
-    login_string = '{} \n'.format(owncall)
+remote_host = clusters[4]["HOST"]
+remote_port = clusters[4]["PORT"]
 tn = telnetlib.Telnet(remote_host, remote_port)
 print("connected")
-output = tn.read_until(expect_string.encode('utf-8'))
-print(output)
 time.sleep(1)
-tn.write(login_string.encode('utf-8'))
+tn.write(owncall.encode('utf-8'))
+if password:
+    print("entering password")
+    time.sleep(1)
+    tn.write(password.encode('utf-8'))
 print("logged in")
 # Define regular expressions
 # callsign pattern that matches also skimmer-calls
@@ -114,6 +110,6 @@ while (1):
         comment = clustermatch.group(4).strip()
         spot_time = clustermatch.group(5)
         #band = qrg_to_band(qrg)
-        print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed{}: time:{}".format(de_call, qrg, dx_call, mode, db, speed, spot_time))
+        print("de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
     else:
-        print(telnet_output)
+        pass
