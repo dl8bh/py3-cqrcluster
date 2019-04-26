@@ -43,8 +43,23 @@ def get_clusters():
     except:
         print ("Error: unable to fetch data")
 
+def get_modes():
+    try:
+   # Execute the SQL command
+        mysql_cursor.execute("SELECT * FROM modes")
+        # Fetch all the rows in a list of lists.
+        results = mysql_cursor.fetchall()
+        pp = pprint.PrettyPrinter()
+        pp.pprint(results)
+        modes = dict()
+        for row in results:
+            modes[row[1]] = row[0]
+        pp.pprint(modes)
+        return(modes)
+    except:
+        print ("Error: unable to fetch data")
     
-
+modes = get_modes()
 clusters = get_clusters()
 
 def close_database_connection():
@@ -96,14 +111,14 @@ while (1):
         de_call = rbnmatch.group(1)
         qrg = float(rbnmatch.group(2))
         dx_call = rbnmatch.group(3)
-        mode = rbnmatch.group(4).strip()
+        mode = modes[rbnmatch.group(4).strip()]
         db = int(rbnmatch.group(5))
         speed = int(rbnmatch.group(6))
         spot_time_string = rbnmatch.group(8)
         spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
         #band = qrg_to_band(qrg)
         print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed{}: time:{}".format(de_call, qrg, dx_call, mode, db, speed, spot_time))
-        sql = "INSERT INTO cluster(de_call, qrg, dx_call, speed, db, clx_timestamp, source) VALUES ('{}', {}, '{}', '{}', '{}', '{}', {})".format(de_call, qrg, dx_call, speed, db, spot_time, cluster_id)
+        sql = "INSERT INTO cluster(de_call, qrg, dx_call, speed, db, clx_timestamp, mode_id, source) VALUES ('{}', {}, '{}', '{}', '{}', '{}', {}, {})".format(de_call, qrg, dx_call, speed, db, spot_time, mode, cluster_id)
         print(sql)
         try:
             # Execute the SQL command

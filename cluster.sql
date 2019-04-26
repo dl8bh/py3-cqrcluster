@@ -1,9 +1,10 @@
+DROP TABLE IF EXISTS `cluster`;
 CREATE TABLE `cluster` (
   `de_call` varchar(20) NOT NULL,
   `qrg` float UNSIGNED DEFAULT NULL,
-  `band` tinyint(3) UNSIGNED DEFAULT NULL,
+  `band_id` tinyint(3) UNSIGNED DEFAULT NULL,
   `dx_call` varchar(20) DEFAULT NULL,
-  `mode` tinyint(3) UNSIGNED NOT NULL,
+  `mode_id` tinyint(3) UNSIGNED DEFAULT NULL,
   `comment` varchar(30) DEFAULT NULL,
   `speed` tinyint(4) DEFAULT NULL,
   `db` tinyint(4) DEFAULT NULL,
@@ -13,13 +14,16 @@ CREATE TABLE `cluster` (
   `id` bigint(20) UNSIGNED NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+
 ALTER TABLE `cluster`
   ADD PRIMARY KEY (`id`),
   ADD KEY `source` (`source`),
   ADD KEY `datetime` (`sys_datetime`),
   ADD KEY `dx_call` (`dx_call`),
   ADD KEY `de_call` (`de_call`),
-  ADD KEY `band` (`band`);
+  ADD KEY `band_id` (`band_id`),
+  ADD KEY `mode_id` (`mode_id`);
+
 
 ALTER TABLE `cluster`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
