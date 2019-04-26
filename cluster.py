@@ -52,11 +52,11 @@ def close_database_connection():
 
 # source: https://www.la1k.no/2017/11/01/parsing-a-dx-cluster-using-python-and-club-log/
 # Open connection to telnet
-owncall = clusters[4]["CALL"] + "\n"
-password = clusters[4]["PASS"] + "\n"
-mode = "rbn"
-remote_host = clusters[4]["HOST"]
-remote_port = clusters[4]["PORT"]
+cluster_id = 6
+owncall = clusters[cluster_id]["CALL"] + "\n"
+password = clusters[cluster_id]["PASS"] + "\n"
+remote_host = clusters[cluster_id]["HOST"]
+remote_port = clusters[cluster_id]["PORT"]
 tn = telnetlib.Telnet(remote_host, remote_port)
 print("connected")
 time.sleep(1)
@@ -102,6 +102,19 @@ while (1):
         spot_time = rbnmatch.group(8)
         #band = qrg_to_band(qrg)
         print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed{}: time:{}".format(de_call, qrg, dx_call, mode, db, speed, spot_time))
+        sql = "INSERT INTO cluster(de_call, qrg, dx_call, speed, db, source) VALUES ('{}', {}, '{}', '{}', '{}', {})".format(de_call, qrg, dx_call, db, speed, cluster_id)
+        print(sql)
+        try:
+            # Execute the SQL command
+            mysql_cursor.execute(sql)
+            # Commit your changes in the database
+            mysql_conn.commit()
+        except:
+            # Rollback in case there is any error
+            mysql_conn.rollback()
+
+
+
     elif clustermatch:
         print(telnet_output)
         de_call = clustermatch.group(1)
