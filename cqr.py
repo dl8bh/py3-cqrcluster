@@ -68,6 +68,40 @@ class cqrmysql:
         except:
             print ("Error: unable to fetch band data")
     
+    def add_cluster_entry(self, de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, timestamp, source):
+        if de_call:
+            de_call = '"{}"'.format(de_call)
+        else:
+            de_call = "NULL"
+        if not band_id:
+            band_id = "NULL"
+        if dx_call:
+            dx_call = '"{}"'.format(dx_call)
+        if not mode_id:
+            mode_id = "NULL"
+        if comment:
+            comment = '"{}"'.format(comment)
+        else:
+            comment = "NULL"
+        if not speed:
+            speed = "NULL"
+        if not db:
+            db = "NULL"
+        if timestamp:
+            timestamp = '"{}"'.format(timestamp)
+        sql = "INSERT INTO cluster(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, clx_timestamp, source) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, timestamp, source)
+        print(sql)
+        try:
+            # Execute the SQL command
+            self.mysql_cursor.execute(sql)
+            # Commit your changes in the database
+            self.mysql_conn.commit()
+            print("success")
+        except:
+            # Rollback in case there is any error
+            self.mysql_conn.rollback()
+            print("fail")
+
     def __del__(self):
         self.mysql_conn.close()
 
