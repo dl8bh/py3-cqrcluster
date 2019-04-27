@@ -1,32 +1,30 @@
 import telnetlib
 import time
 import re
-class entry:
-
-    def __init__(self, de_call, qrg, dx_call, mode, comment, speed, db, clx_timestamp, source):
-        pass
+import cqr
 
 class cluster:
 
-    def __init__(self, database, cluster_list, mode_list):
+    def __init__(self, database, cluster_list, mode_list, band_data):
         self.clusters = cluster_list
         self.database = database
         self.modes = mode_list
+        self.band_data = band_data
+        self.helper = cqr.helper(mode_list, band_data)
         
         # Define regular expressions
 
         # callsign pattern that matches also skimmer-calls
-        self.de_callsign_pattern = "([a-z|0-9|/|#|-]+)"
+        de_callsign_pattern = "([a-z|0-9|/|#|-]+)"
         # classical callsign pattern
-        self.dx_callsign_pattern = "([a-z|0-9|/]+)"
-        self.frequency_pattern = "([0-9|.]+)"
-        self.mode_pattern = "([a-z|0-9]+)"
-        self.db_pattern = "([0-9]+)"
-        self.speedstring_pattern = "([WPM|BPS])"
-        self.cluster_pattern = re.compile("^DX de "+self.de_callsign_pattern+":\s+"+self.frequency_pattern+"\s+"+self.dx_callsign_pattern+"\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
+        dx_callsign_pattern = "([a-z|0-9|/]+)"
+        frequency_pattern = "([0-9|.]+)"
+        mode_pattern = "([a-z|0-9]+)"
+        db_pattern = "([0-9]+)"
+        self.cluster_pattern = re.compile("^DX de "+de_callsign_pattern+":\s+"+frequency_pattern+"\s+"+dx_callsign_pattern+"\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
         # RBN
         # DX de LZ7AA-#:    7047.1  OE/PE1NYQ      RTTY  15 dB  45 BPS  CQ      1814Z
-        self.rbn_pattern = re.compile("^DX de "+self.de_callsign_pattern+":\s+"+self.frequency_pattern+"\s*"+self.dx_callsign_pattern+"\s+"+self.mode_pattern+"\s+"+self.db_pattern+" dB\s+"+self.db_pattern+"(.*)\s+(\d{4}Z)", re.IGNORECASE)
+        self.rbn_pattern = re.compile("^DX de "+de_callsign_pattern+":\s+"+frequency_pattern+"\s*"+dx_callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+"+db_pattern+"(.*)\s+(\d{4}Z)", re.IGNORECASE)
         # alternative RBN pattern that excludes skimmer suffix in de calls
         # rbn_pattern = re.compile("^DX de "+callsign_pattern+"-[1-9|-]*#:\s+"+frequency_pattern+"\s+"+callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+"+db_pattern+"(.*)\s+(\d{4}Z)", re.IGNORECASE)
     def connect(self, cluster_id):
@@ -45,34 +43,32 @@ class cluster:
         print("logged in")
         # Parse telnet
         while (1):
-            # Check new telnet info against regular expression
             telnet_output = tn.read_until(b'\n').decode('utf-8')
-            #telnet_output = tn.read_eager()
-            print(telnet_output)
             rbnmatch = self.rbn_pattern.match(telnet_output)
             clustermatch = self.cluster_pattern.match(telnet_output)
-            # If there is a match, sort matches into variables
+            de_call = None
+            qrg = None
+            dx_call = None
+            mode_id = None 
+            comment = None
+            speed = None
+            db = None
+            spot_time = None
+            band_id = None
+            
             if rbnmatch:
                 de_call = rbnmatch.group(1)
                 qrg = float(rbnmatch.group(2))
                 dx_call = rbnmatch.group(3)
-                mode = self.modes[rbnmatch.group(4).strip()]
+                mode_id = self.modes[rbnmatch.group(4).strip()]
                 db = int(rbnmatch.group(5))
                 speed = int(rbnmatch.group(6))
                 spot_time_string = rbnmatch.group(8)
                 spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
-                #band = qrg_to_band(qrg)
-                print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed{}: time:{}".format(de_call, qrg, dx_call, mode, db, speed, spot_time))
-                sql = "INSERT INTO cluster(de_call, qrg, dx_call, speed, db, clx_timestamp, mode_id, source) VALUES ('{}', {}, '{}', '{}', '{}', '{}', {}, {})".format(de_call, qrg, dx_call, speed, db, spot_time, mode, cluster_id)
-                print(sql)
-                try:
-                    # Execute the SQL command
-                    self.database.mysql_cursor.execute(sql)
-                    # Commit your changes in the database
-                    self.database.mysql_conn.commit()
-                except:
-                    # Rollback in case there is any error
-                    self.database.mysql_conn.rollback()
+                band = self.helper.freq_to_band(qrg/1000)
+                band_id = band["ID"]
+                print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed{}: time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
 
 
 
@@ -82,8 +78,13 @@ class cluster:
                 qrg = float(clustermatch.group(2))
                 dx_call = clustermatch.group(3)
                 comment = clustermatch.group(4).strip()
-                spot_time = clustermatch.group(5)
-                #band = qrg_to_band(qrg)
+                spot_time_string = clustermatch.group(5)
+                spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
+                mode_id = self.helper.freq_to_mode(qrg/1000)
+                band = self.helper.freq_to_band(qrg/1000)
+                band_id = band["ID"]
                 print("de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
             else:
-                pass
+                print(telnet_output)
+            
