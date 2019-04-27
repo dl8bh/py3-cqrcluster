@@ -4,7 +4,7 @@ import re
 import time
 import configparser
 from datetime import datetime
-import cqrmysql
+from cqr import cqrmysql
 
 
 CFG = configparser.ConfigParser()
@@ -15,7 +15,7 @@ MYSQL_USER  = CFG.get('CLUSTER', 'mysql_user')
 MYSQL_PASS  = CFG.get('CLUSTER', 'mysql_pass')
 MYSQL_DB    = CFG.get('CLUSTER', 'mysql_db')
 
-database = cqrmysql.cqrmysql(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
+database = cqrmysql(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
 modes = database.get_modes()
 clusters = database.get_clusters()
 
