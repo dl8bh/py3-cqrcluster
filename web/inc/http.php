@@ -9,7 +9,7 @@ class http_helper {
     public function __construct(array $GETPARAMS = array(), array $POSTPARAMS = array()) {
         $this->limit = (int)($GETPARAMS["limit"]);
         $this->band = (int)($GETPARAMS["band"]);
-        if (($GETPARAMS)["skimmer"] === '')
+        if (empty($GETPARAMS["skimmer"]))
         {
             $this->skimmer = 1;
         }
