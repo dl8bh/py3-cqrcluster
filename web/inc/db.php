@@ -20,6 +20,7 @@ class cqrdb {
         }
         $this->bands = $this::get_bands();
         $this->modes = $this::get_modes();
+        $this->sources = $this::get_sources();
     }
     
     public function set_default_count(int $count)
@@ -45,6 +46,17 @@ class cqrdb {
             $bands[$band["ID"]] = $band;
         }
         return $bands;
+    }
+    public function get_sources(): array
+    {
+        $this->dbconnect->select_db("cqrlog_common");
+        $result = mysqli_query($this->dbconnect, "SELECT * from dxclusters ORDER BY id_dxclusters");
+        $dxclusters = array();
+        while ($row = mysqli_fetch_object($result))
+        {
+            $dxclusters[$row->id_dxclusters] = $row->description;
+        }
+        return $dxclusters;
     }
 
     public function get_modes(): array
@@ -127,6 +139,22 @@ class cqrdb {
         foreach ($this->modes as $mode_id => $mode_name)
         {
             if ($mode_name == strtoupper($mode)) return $mode_id;
+        }
+        return 0;
+    }
+    public function id_to_source (int $id): string
+    {   
+        foreach ($this->sources as $source_id => $source_name)
+        {
+            if ($id == $source_id) return $source_name;
+        }
+        return '';
+    }
+    public function source_to_id( string $source): int
+    {   
+        foreach ($this->sources as $source_id => $source_name)
+        {
+            if ($source_name == strtoupper($source)) return $source_id;
         }
         return 0;
     }
