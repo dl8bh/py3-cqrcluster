@@ -12,6 +12,7 @@ foreach ($entry_list as $entry)
     echo 
     $entry["DE_CALL"] 
     . "^" . $entry["QRG"] 
+    . "^" . $entry["DX_CALL"] 
     . "^" . $entry["BAND"] 
     . "^" . $entry["MODE"] 
     . "^" . $entry["COMMENT"]

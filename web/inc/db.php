@@ -113,6 +113,7 @@ class cqrdb {
             $line["QRG"] = $row->qrg;
             $line["BAND"] = $this->bands[$row->band_id]["NAME"];
             $line["MODE"] = $this->modes[$row->mode_id];
+            $line["DX_CALL"] = $row->dx_call;
             $line["COMMENT"] = $row->comment;
             $line["SPEED"] = $row->speed;
             $line["DB"] = $row->db;
