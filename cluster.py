@@ -58,8 +58,9 @@ class cluster:
             db = None
             spot_time = None
             band_id = None
-            
+            print("\n\n")
             if rbnmatch:
+                print("SKIMMER: " + telnet_output)
                 de_call = rbnmatch.group(1)
                 qrg = float(rbnmatch.group(2))
                 dx_call = rbnmatch.group(3)
@@ -69,11 +70,15 @@ class cluster:
                 spot_time_string = rbnmatch.group(8)
                 spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
                 band = self.helper.freq_to_band(qrg/1000)
-                band_id = band["ID"]
-                print("SKIMMER de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
+                if not band:
+                    band_id = None
+                else:
+                    band_id = band["ID"]
+                print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
                 self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
 
             elif cc_datamatch:
+                print("CC_DATA: " + telnet_output)
                 de_call = cc_datamatch.group(1)
                 qrg = float(cc_datamatch.group(2))
                 dx_call = cc_datamatch.group(3)
@@ -82,12 +87,15 @@ class cluster:
                 spot_time_string = cc_datamatch.group(7)
                 spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
                 band = self.helper.freq_to_band(qrg/1000)
-                band_id = band["ID"]
+                if not band:
+                    band_id = None
+                else:
+                    band_id = band["ID"]
                 print("NOSPEED de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
                 self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
 
             elif clustermatch:
-                print(telnet_output)
+                print("CLUSTER: " + telnet_output)
                 de_call = clustermatch.group(1)
                 qrg = float(clustermatch.group(2))
                 dx_call = clustermatch.group(3)
@@ -96,9 +104,12 @@ class cluster:
                 spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
                 mode_id = self.helper.freq_to_mode(qrg/1000)
                 band = self.helper.freq_to_band(qrg/1000)
-                band_id = band["ID"]
+                if not band:
+                    band_id = None
+                else:
+                    band_id = band["ID"]
                 print("CLUSTER: de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
                 self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
             else:
-                print(telnet_output)
+                print("NOMATCH: " + telnet_output)
             
