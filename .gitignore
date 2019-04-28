@@ -123,3 +123,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 web/config.php
+.vscode/tags
+.vscode/launch.json
