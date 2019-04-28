@@ -120,6 +120,8 @@ class helper:
 
     def freq_to_mode(self, freq):
         band = self.freq_to_band(freq)
+        if not band:
+            return(None)
         if freq <= band["F_CW"]:
             return(self.mode_list["CW"])
         elif band["F_SSB"] >= freq >= band["F_RTTY"]:
