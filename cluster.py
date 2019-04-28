@@ -21,10 +21,12 @@ class cluster:
         frequency_pattern = "([0-9|.]+)"
         mode_pattern = "([a-z|0-9]+)"
         db_pattern = "([0-9]+)"
-        self.cluster_pattern = re.compile("^DX de "+de_callsign_pattern+":\s+"+frequency_pattern+"\s+"+dx_callsign_pattern+"\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
+        self.cluster_pattern = re.compile("^DX de "+dx_callsign_pattern+":\s+"+frequency_pattern+"\s+"+dx_callsign_pattern+"\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
         # RBN
         # DX de LZ7AA-#:    7047.1  OE/PE1NYQ      RTTY  15 dB  45 BPS  CQ      1814Z
+        # 
         self.rbn_pattern = re.compile("^DX de "+de_callsign_pattern+":\s+"+frequency_pattern+"\s*"+dx_callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+"+db_pattern+"(.*)\s+(\d{4}Z)", re.IGNORECASE)
+        self.cc_data_pattern = re.compile("^DX de "+de_callsign_pattern+":\s+"+frequency_pattern+"\s*"+dx_callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
         # alternative RBN pattern that excludes skimmer suffix in de calls
         # rbn_pattern = re.compile("^DX de "+callsign_pattern+"-[1-9|-]*#:\s+"+frequency_pattern+"\s+"+callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+"+db_pattern+"(.*)\s+(\d{4}Z)", re.IGNORECASE)
     def connect(self, cluster_id):
@@ -45,6 +47,7 @@ class cluster:
         while (1):
             telnet_output = tn.read_until(b'\n').decode('utf-8')
             rbnmatch = self.rbn_pattern.match(telnet_output)
+            cc_datamatch = self.cc_data_pattern.match(telnet_output)
             clustermatch = self.cluster_pattern.match(telnet_output)
             de_call = None
             qrg = None
@@ -67,10 +70,21 @@ class cluster:
                 spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
                 band = self.helper.freq_to_band(qrg/1000)
                 band_id = band["ID"]
-                print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed{}: time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
+                print("SKIMMER de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
                 self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
 
-
+            elif cc_datamatch:
+                de_call = cc_datamatch.group(1)
+                qrg = float(cc_datamatch.group(2))
+                dx_call = cc_datamatch.group(3)
+                mode_id = self.modes[cc_datamatch.group(4).strip()]
+                db = int(cc_datamatch.group(5))
+                spot_time_string = cc_datamatch.group(7)
+                spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
+                band = self.helper.freq_to_band(qrg/1000)
+                band_id = band["ID"]
+                print("NOSPEED de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
 
             elif clustermatch:
                 print(telnet_output)
@@ -83,7 +97,7 @@ class cluster:
                 mode_id = self.helper.freq_to_mode(qrg/1000)
                 band = self.helper.freq_to_band(qrg/1000)
                 band_id = band["ID"]
-                print("de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
+                print("CLUSTER: de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
                 self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
             else:
                 print(telnet_output)
