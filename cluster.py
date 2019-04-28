@@ -37,15 +37,15 @@ class cluster:
         tn = telnetlib.Telnet(remote_host, remote_port)
         print("connected")
         time.sleep(1)
-        tn.write(owncall.encode('utf-8'))
+        tn.write(owncall.encode('latin-1'))
         if password:
             print("entering password")
             time.sleep(1)
-            tn.write(password.encode('utf-8'))
+            tn.write(password.encode('latin-1'))
         print("logged in")
         # Parse telnet
         while (1):
-            telnet_output = tn.read_until(b'\n').decode('utf-8')
+            telnet_output = tn.read_until(b'\n').decode('latin-1')
             rbnmatch = self.rbn_pattern.match(telnet_output)
             cc_datamatch = self.cc_data_pattern.match(telnet_output)
             clustermatch = self.cluster_pattern.match(telnet_output)
