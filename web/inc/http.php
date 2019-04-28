@@ -1,7 +1,7 @@
 <?php
 class http_helper {
     private $limit = 100;
-    private $skimmer = true;
+    private $skimmer = 1;
     private $band;
     private $mode;
     private $source = '';
@@ -9,12 +9,12 @@ class http_helper {
     public function __construct(array $GETPARAMS = array(), array $POSTPARAMS = array()) {
         $this->limit = (int)($GETPARAMS["limit"]);
         $this->band = (int)($GETPARAMS["band"]);
-        if (($GETPARAMS)["skimmer"] === 'false')
+        if (($GETPARAMS)["skimmer"] === '')
         {
-            $this->skimmer = false;
+            $this->skimmer = 1;
         }
         else {
-            $this->skimmer = (bool)$GETPARAMS["skimmer"];
+            $this->skimmer = (int)$GETPARAMS["skimmer"];
         }
         $this->band = (string)$GETPARAMS["band"];
         $this->mode = (string)$GETPARAMS["mode"];

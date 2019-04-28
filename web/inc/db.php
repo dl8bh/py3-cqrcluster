@@ -73,7 +73,7 @@ class cqrdb {
         return $modes;
     }
 
-    public function get_last_n_lines(int $count = 0, int $band = 0, int $mode = 0, int $source = int) :array 
+    public function get_last_n_lines(int $count = 0, int $band = 0, int $mode = 0, int $skimmer = 1, int $source = int) :array 
     {   
         $this->dbconnect->select_db("cqrlog_common");
         $lines = array();
@@ -95,6 +95,15 @@ class cqrdb {
         {
             $where .= " AND source = '" . $source . "'";
         }
+        if ($skimmer === 0) // cluster only
+        {
+            $where .= " AND skimmer = 0";
+        }
+        else if ($skimmer === 1) assert(true); // both skimmer and cluster
+        else if ($skimmer === 2) // skimmer only
+        {  
+            $where .= " AND skimmer = 1";
+        }
         $query .= $where . " ORDER BY id DESC LIMIT " . $count;
         $result = mysqli_query($this->dbconnect, $query);
         while ($row = mysqli_fetch_object($result))
@@ -110,6 +119,7 @@ class cqrdb {
             $line["SYS_DATETIME"] = $row->sys_datetime;
             $line["timestamp"] = $row->clx_timestamp;
             $line["source"] = $row->source;
+            $line["skimmer"] = $row->skimmer;
             $line["ID"] = $row->id;
             array_push($lines, $line);
         }

@@ -6,7 +6,7 @@ include("inc/http.php");
 
 $headers = new http_helper($_GET, array());
 $cqrdb = new cqrdb($db_hostname, $db_username, $db_password, $db);
-$entry_list = $cqrdb->get_last_n_lines($headers->get_limit(), $cqrdb->band_to_id($headers->get_band()), $cqrdb->mode_to_id($headers->get_mode()), $cqrdb->source_to_id($headers->get_source()));
+$entry_list = $cqrdb->get_last_n_lines($headers->get_limit(), $cqrdb->band_to_id($headers->get_band()), $cqrdb->mode_to_id($headers->get_mode()), $headers->get_skimmer(),  $cqrdb->source_to_id($headers->get_source()));
 foreach ($entry_list as $entry)
 {
     echo 
@@ -18,6 +18,7 @@ foreach ($entry_list as $entry)
     . "^" . $entry["SPEED"] 
     . "^" . $entry["DB"]  
     . "^" . $entry["timestamp"]
+    . "^" . (int)$entry["skimmer"]
     . "^" . $cqrdb->id_to_source($entry["source"])
     
     .  "\n";
