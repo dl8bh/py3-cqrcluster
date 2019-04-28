@@ -4,7 +4,7 @@ class http_helper {
     private $skimmer = true;
     private $band;
     private $mode;
-    private $source = 0;
+    private $source = '';
     
     public function __construct(array $GETPARAMS = array(), array $POSTPARAMS = array()) {
         $this->limit = (int)($GETPARAMS["limit"]);
@@ -18,6 +18,7 @@ class http_helper {
         }
         $this->band = (string)$GETPARAMS["band"];
         $this->mode = (string)$GETPARAMS["mode"];
+        $this->source = (string)$GETPARAMS["source"];
         if ((int)$GETPARAMS["limit"]) {
             $this->limit = (int)$GETPARAMS["limit"];
         }
@@ -44,7 +45,7 @@ class http_helper {
     {
         return($this->skimmer);
     }
-    public function get_source(): int
+    public function get_source(): string
     {
         return($this->source);
     }
