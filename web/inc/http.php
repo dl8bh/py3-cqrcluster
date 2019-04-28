@@ -9,7 +9,7 @@ class http_helper {
     public function __construct(array $GETPARAMS = array(), array $POSTPARAMS = array()) {
         $this->limit = (int)($GETPARAMS["limit"]);
         $this->band = (int)($GETPARAMS["band"]);
-        if (empty($GETPARAMS["skimmer"]))
+        if (!isset($GETPARAMS["skimmer"]))
         {
             $this->skimmer = 1;
         }
@@ -41,7 +41,7 @@ class http_helper {
         return($this->mode);
     }
 
-    public function get_skimmer(): bool
+    public function get_skimmer(): int
     {
         return($this->skimmer);
     }
