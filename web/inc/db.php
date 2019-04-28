@@ -75,6 +75,14 @@ class cqrdb {
         {
             $where .= " AND mode_id = '" . $mode . "'";
         }
+        if ($band != 0)
+        {
+            $where .= " AND band_id = '" . $band . "'";
+        }
+        if ($source != 0)
+        {
+            $where .= " AND source = '" . $source . "'";
+        }
         echo $where;
         $query .= $where . " ORDER BY id DESC LIMIT " . $count;
         echo $query;
@@ -98,6 +106,32 @@ class cqrdb {
         return $lines;
     }
 
+    public function id_to_band(int $id): string
+    {   
+        foreach ($this->bands as $band_id => $band_details)
+        {
+            if ($id == $band_id) return $band_details["NAME"];
+        }
+        return '';
+    }
+
+    public function band_to_id( string $band): int
+    {   
+        foreach ($this->bands as $band_id => $band_details)
+        {
+            if ($band_details["NAME"] == strtoupper($band)) return $band_id;
+        }
+        return 0;
+    }
+
+    public function mode_to_id( string $mode): int
+    {   
+        foreach ($this->modes as $mode_id => $mode_name)
+        {
+            if ($mode_name == strtoupper($mode)) return $mode_id;
+        }
+        return 0;
+    }
 }
 
 
