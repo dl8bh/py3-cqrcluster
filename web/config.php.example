@@ -1,0 +1,6 @@
+<?php
+$db_hostname = "localhost";
+$db_username = "cqrlog";
+$db_password = "cqrlog";
+$db = "cqrlog_common";
+?>
