@@ -83,9 +83,7 @@ class cqrdb {
         {
             $where .= " AND source = '" . $source . "'";
         }
-        echo $where;
         $query .= $where . " ORDER BY id DESC LIMIT " . $count;
-        echo $query;
         $result = mysqli_query($this->dbconnect, $query);
         while ($row = mysqli_fetch_object($result))
         {
