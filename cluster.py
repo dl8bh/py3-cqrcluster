@@ -75,7 +75,7 @@ class cluster:
                 else:
                     band_id = band["ID"]
                 print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, cluster_id)
 
             elif cc_datamatch:
                 print("CC_DATA: " + telnet_output)
@@ -92,7 +92,7 @@ class cluster:
                 else:
                     band_id = band["ID"]
                 print("NOSPEED de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, cluster_id)
 
             elif clustermatch:
                 print("CLUSTER: " + telnet_output)
@@ -109,7 +109,7 @@ class cluster:
                 else:
                     band_id = band["ID"]
                 print("CLUSTER: de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, cluster_id)
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, False, cluster_id)
             else:
                 print("NOMATCH: " + telnet_output)
             
