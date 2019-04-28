@@ -9,7 +9,7 @@ from cluster import cluster
 
 
 CFG = configparser.ConfigParser()
-CFG.read(os.path.expanduser(os.path.dirname(__file__) + '/cluster.cfg'))
+CFG.read(os.path.expanduser(os.path.dirname(os.path.abspath(__file__)) + '/cluster.cfg'))
 MYSQL_HOST  = CFG.get('CLUSTER', 'mysql_host')
 MYSQL_PORT  = CFG.get('CLUSTER', 'mysql_port')
 MYSQL_USER  = CFG.get('CLUSTER', 'mysql_user')
