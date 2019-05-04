@@ -11,7 +11,6 @@ class cluster:
         self.modes = mode_list
         self.band_data = band_data
         self.helper = cqr.helper(mode_list, band_data)
-        
         # Define regular expressions
 
         # callsign pattern that matches also skimmer-calls
@@ -19,7 +18,11 @@ class cluster:
         # classical callsign pattern
         dx_callsign_pattern = "([a-z|0-9|/]+)"
         frequency_pattern = "([0-9|.]+)"
-        mode_pattern = "([a-z|0-9]+)"
+        print(mode_list)
+        mode_pattern_list = ''
+        for mode in mode_list:
+            mode_pattern_list +=  mode + "|"
+        mode_pattern = '(' + mode_pattern_list[:-1] + ')'
         db_pattern = "([0-9]+)"
         self.cluster_pattern = re.compile("^DX de "+dx_callsign_pattern+":\s+"+frequency_pattern+"\s+"+dx_callsign_pattern+"\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
         # RBN
