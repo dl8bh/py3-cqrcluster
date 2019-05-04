@@ -18,7 +18,6 @@ class cluster:
         # classical callsign pattern
         dx_callsign_pattern = "([a-z|0-9|/]+)"
         frequency_pattern = "([0-9|.]+)"
-        print(mode_list)
         mode_pattern_list = ''
         for mode in mode_list:
             mode_pattern_list +=  mode + "|"
