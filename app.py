@@ -25,3 +25,4 @@ cluster_list = database.get_clusters()
 cluster_id = 5
 dxc = cluster(database, cluster_list, mode_list, band_data)
 dxc.connect(cluster_id)
+dxc.run()

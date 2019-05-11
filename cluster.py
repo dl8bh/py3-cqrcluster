@@ -31,23 +31,32 @@ class cluster:
         self.cc_data_pattern = re.compile("^DX de "+de_callsign_pattern+":\s+"+frequency_pattern+"\s*"+dx_callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
         # alternative RBN pattern that excludes skimmer suffix in de calls
         # rbn_pattern = re.compile("^DX de "+callsign_pattern+"-[1-9|-]*#:\s+"+frequency_pattern+"\s+"+callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+"+db_pattern+"(.*)\s+(\d{4}Z)", re.IGNORECASE)
+
     def connect(self, cluster_id):
         owncall = self.clusters[cluster_id]["CALL"] + "\n"
         password = self.clusters[cluster_id]["PASS"] + "\n"
         remote_host = self.clusters[cluster_id]["HOST"]
         remote_port = self.clusters[cluster_id]["PORT"]
-        tn = telnetlib.Telnet(remote_host, remote_port)
+        self.tn = telnetlib.Telnet(remote_host, remote_port)
+        self.cluster_id = cluster_id
         print("connected")
         time.sleep(1)
-        tn.write(owncall.encode('latin-1'))
+        self.tn.write(owncall.encode('latin-1'))
         if password:
             print("entering password")
             time.sleep(1)
-            tn.write(password.encode('latin-1'))
+            self.tn.write(password.encode('latin-1'))
         print("logged in")
         # Parse telnet
+
+    def run(self):
         while (1):
-            telnet_output = tn.read_until(b'\n').decode('latin-1')
+            try:
+                telnet_output = self.tn.read_until(b'\n').decode('latin-1')
+            except TimeoutError:
+                print("Reconnecting")
+                self.connect(self.cluster_id)
+                continue
             rbnmatch = self.rbn_pattern.match(telnet_output)
             cc_datamatch = self.cc_data_pattern.match(telnet_output)
             clustermatch = self.cluster_pattern.match(telnet_output)
@@ -77,7 +86,7 @@ class cluster:
                 else:
                     band_id = band["ID"]
                 print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, cluster_id)
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, self.cluster_id)
 
             elif cc_datamatch:
                 print("CC_DATA: " + telnet_output)
@@ -94,7 +103,7 @@ class cluster:
                 else:
                     band_id = band["ID"]
                 print("NOSPEED de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, cluster_id)
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, self.cluster_id)
 
             elif clustermatch:
                 print("CLUSTER: " + telnet_output)
@@ -111,7 +120,7 @@ class cluster:
                 else:
                     band_id = band["ID"]
                 print("CLUSTER: de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, False, cluster_id)
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, False, self.cluster_id)
             else:
                 print("NOMATCH: " + telnet_output)
             
