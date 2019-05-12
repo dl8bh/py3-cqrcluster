@@ -16,6 +16,10 @@ MYSQL_USER  = CFG.get('CLUSTER', 'mysql_user')
 MYSQL_PASS  = CFG.get('CLUSTER', 'mysql_pass')
 MYSQL_DB    = CFG.get('CLUSTER', 'mysql_db')
 
+CTYFILES_PATH = os.path.expanduser(CFG.get('CTYFILES', 'path'))
+CTYFILES_URL = CFG.get('CTYFILES', 'url')
+AUTOFETCH_FILES = CFG.getboolean('CTYFILES', 'autofetch')
+
 database = cqr.cqrmysql(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB)
 mode_list = database.get_modes()
 band_data = database.get_band_data()
@@ -24,5 +28,6 @@ cluster_list = database.get_clusters()
 
 cluster_id = 5
 dxc = cluster(database, cluster_list, mode_list, band_data)
+dxc.enable_dxcc_resolution(CTYFILES_PATH, CTYFILES_URL, AUTOFETCH_FILES)
 dxc.connect(cluster_id)
 dxc.run()

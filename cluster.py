@@ -11,6 +11,7 @@ class cluster:
         self.modes = mode_list
         self.band_data = band_data
         self.helper = cqr.helper(mode_list, band_data)
+        self.dxcc_resolution = False
         # Define regular expressions
 
         # callsign pattern that matches also skimmer-calls
@@ -31,6 +32,11 @@ class cluster:
         self.cc_data_pattern = re.compile("^DX de "+de_callsign_pattern+":\s+"+frequency_pattern+"\s*"+dx_callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+(.*)\s+(\d{4}Z)", re.IGNORECASE)
         # alternative RBN pattern that excludes skimmer suffix in de calls
         # rbn_pattern = re.compile("^DX de "+callsign_pattern+"-[1-9|-]*#:\s+"+frequency_pattern+"\s+"+callsign_pattern+"\s+"+mode_pattern+"\s+"+db_pattern+" dB\s+"+db_pattern+"(.*)\s+(\d{4}Z)", re.IGNORECASE)
+    
+    def enable_dxcc_resolution(self, CTYFILES_PATH, CTYFILES_URL, AUTOFETCH_FILES):
+        from pydxcc import dxcc
+        self.dxcc_resolver = dxcc(CTYFILES_PATH, CTYFILES_URL, AUTOFETCH_FILES)
+        self.dxcc_resolution = True
 
     def connect(self, cluster_id):
         owncall = self.clusters[cluster_id]["CALL"] + "\n"
@@ -75,6 +81,10 @@ class cluster:
                 de_call = rbnmatch.group(1)
                 qrg = float(rbnmatch.group(2))
                 dx_call = rbnmatch.group(3)
+                if self.dxcc_resolution:
+                    adif = self.dxcc_resolver.call2dxcc(dx_call)[1]["adif"]
+                else:
+                    adif = None
                 mode_id = self.modes[rbnmatch.group(4).strip()]
                 db = int(rbnmatch.group(5))
                 speed = int(rbnmatch.group(6))
@@ -85,14 +95,18 @@ class cluster:
                     band_id = None
                 else:
                     band_id = band["ID"]
-                print("de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, self.cluster_id)
+                print("de:{} qrg:{} dx_call:{} adif:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, adif, mode_id, db, speed, spot_time))
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, adif, mode_id, comment, speed, db, spot_time, True, self.cluster_id)
 
             elif cc_datamatch:
                 print("CC_DATA: " + telnet_output)
                 de_call = cc_datamatch.group(1)
                 qrg = float(cc_datamatch.group(2))
                 dx_call = cc_datamatch.group(3)
+                if self.dxcc_resolution:
+                    adif = self.dxcc_resolver.call2dxcc(dx_call)[1]["adif"]
+                else:
+                    adif = None
                 mode_id = self.modes[cc_datamatch.group(4).strip()]
                 db = int(cc_datamatch.group(5))
                 spot_time_string = cc_datamatch.group(7)
@@ -102,14 +116,18 @@ class cluster:
                     band_id = None
                 else:
                     band_id = band["ID"]
-                print("NOSPEED de:{} qrg:{} dx_call:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, mode_id, db, speed, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, True, self.cluster_id)
+                print("NOSPEED de:{} qrg:{} dx_call:{} adif:{} mode:{} db:{} speed:{} time:{}".format(de_call, qrg, dx_call, adif, mode_id, db, speed, spot_time))
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, adif, mode_id, comment, speed, db, spot_time, True, self.cluster_id)
 
             elif clustermatch:
                 print("CLUSTER: " + telnet_output)
                 de_call = clustermatch.group(1)
                 qrg = float(clustermatch.group(2))
                 dx_call = clustermatch.group(3)
+                if self.dxcc_resolution:
+                    adif = self.dxcc_resolver.call2dxcc(dx_call)[1]["adif"]
+                else:
+                    adif = None
                 comment = clustermatch.group(4).strip()
                 spot_time_string = clustermatch.group(5)
                 spot_time = "{}:{}".format(spot_time_string[0:2], spot_time_string[2:4])
@@ -119,8 +137,8 @@ class cluster:
                     band_id = None
                 else:
                     band_id = band["ID"]
-                print("CLUSTER: de:{} qrg:{} dx_call:{} comment:{} time:{}".format(de_call, qrg, dx_call, comment, spot_time))
-                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, spot_time, False, self.cluster_id)
+                print("CLUSTER: de:{} qrg:{} dx_call:{} adif:{} comment:{} time:{}".format(de_call, qrg, dx_call, adif, comment, spot_time))
+                self.database.add_cluster_entry(de_call, qrg, band_id, dx_call, adif, mode_id, comment, speed, db, spot_time, False, self.cluster_id)
             else:
                 print("NOMATCH: " + telnet_output)
             

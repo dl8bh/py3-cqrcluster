@@ -68,7 +68,7 @@ class cqrmysql:
         except:
             print ("Error: unable to fetch band data")
     
-    def add_cluster_entry(self, de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, timestamp, skimmer,source):
+    def add_cluster_entry(self, de_call, qrg, band_id, dx_call, adif, mode_id, comment, speed, db, timestamp, skimmer,source):
         if de_call:
             de_call = '"{}"'.format(de_call)
         else:
@@ -87,9 +87,11 @@ class cqrmysql:
             speed = "NULL"
         if not db:
             db = "NULL"
+        if not adif:
+            adif = "NULL"
         if timestamp:
             timestamp = '"{}"'.format(timestamp)
-        sql = "INSERT INTO cluster(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, clx_timestamp, skimmer, source) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(de_call, qrg, band_id, dx_call, mode_id, comment, speed, db, timestamp, skimmer, source)
+        sql = "INSERT INTO cluster(de_call, qrg, band_id, dx_call, adif, mode_id, comment, speed, db, clx_timestamp, skimmer, source) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(de_call, qrg, band_id, dx_call, adif, mode_id, comment, speed, db, timestamp, skimmer, source)
         print(sql)
         try:
             # Execute the SQL command
