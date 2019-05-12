@@ -5,3 +5,7 @@ mysql_user = "cqrlog"
 mysql_pass = "password"
 mysql_db = "cqrlog_common"
 mysql_table = "cluster"
+[CTYFILES]
+path = ~/.config/cqrlog/dxcc_data/
+url = http://www.ok2cqr.com/linux/cqrlog/ctyfiles/cqrlog-cty.tar.gz
+autofetch = True
