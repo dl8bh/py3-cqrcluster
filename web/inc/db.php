@@ -73,7 +73,7 @@ class cqrdb {
         return $modes;
     }
 
-    public function get_last_n_lines(int $count = 0, int $band = 0, int $mode = 0, int $skimmer = 1, int $source = int) :array 
+    public function get_last_n_lines(int $count = 0, int $band = 0, int $mode = 0, int $skimmer = 1, int $adif = 0, int $source = int) :array 
     {   
         $this->dbconnect->select_db("cqrlog_common");
         $lines = array();
@@ -90,6 +90,10 @@ class cqrdb {
         if ($band != 0)
         {
             $where .= " AND band_id = '" . $band . "'";
+        }
+        if ($adif != 0)
+        {
+            $where .= " AND adif = '" . $adif . "'";
         }
         if ($source != 0)
         {
@@ -114,6 +118,7 @@ class cqrdb {
             $line["BAND"] = $this->bands[$row->band_id]["NAME"];
             $line["MODE"] = $this->modes[$row->mode_id];
             $line["DX_CALL"] = $row->dx_call;
+            $line["ADIF"] = $row->adif;
             $line["COMMENT"] = $row->comment;
             $line["SPEED"] = $row->speed;
             $line["DB"] = $row->db;

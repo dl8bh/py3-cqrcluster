@@ -5,6 +5,7 @@ class http_helper {
     private $band;
     private $mode;
     private $source = '';
+    private $adif = 0;
     
     public function __construct(array $GETPARAMS = array(), array $POSTPARAMS = array()) {
         $this->limit = (int)($GETPARAMS["limit"]);
@@ -21,6 +22,9 @@ class http_helper {
         $this->source = (string)$GETPARAMS["source"];
         if ((int)$GETPARAMS["limit"]) {
             $this->limit = (int)$GETPARAMS["limit"];
+        }
+        if ((int)$GETPARAMS["adif"]) {
+            $this->adif = (int)$GETPARAMS["adif"];
         }
 
         
@@ -48,6 +52,10 @@ class http_helper {
     public function get_source(): string
     {
         return($this->source);
+    }
+    public function get_adif(): string
+    {
+        return($this->adif);
     }
 
 }

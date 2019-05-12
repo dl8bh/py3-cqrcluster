@@ -7,7 +7,7 @@ CREATE TABLE `cluster` (
   `comment` varchar(30) DEFAULT NULL,
   `speed` tinyint(4) DEFAULT NULL,
   `db` tinyint(4) DEFAULT NULL,
-  `adif` tinyint(3) UNSIGNED DEFAULT NULL,
+  `adif` smallint(5) UNSIGNED DEFAULT NULL,
   `sys_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `clx_timestamp` time DEFAULT NULL,
   `source` tinyint(4) NOT NULL,
